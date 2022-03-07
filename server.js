@@ -7,8 +7,6 @@ const path = require('path');
 var xssFilter = require('x-xss-protection');
 var nosniff = require('dont-sniff-mimetype');
 const request = require('request');
-const {low, JSONFile } = import('lowdb')
-const { nanoId } = require('nanoid');
 const axios = require('axios')
 
 const app = express();
@@ -38,15 +36,7 @@ app.use(
   })
 );
 
-app.get('/auth/isAuthenticated', (req, res) => {
-  let password = true
-  if (password) {
-    res.send({ authenticated: true });
-  } else {
-    res.send({ authenticated: false });
-  }
 
-})
 
 app.get('/api/members', (req, res) => {
   request('http://localhost:3000/members', (err, response, body) => {
@@ -65,6 +55,20 @@ app.get('/api/teams', (req, res) => {
   });
 });
 
+app.post('/auth/isAuthenticated', async (req, res) => {
+  let users = await axios.get('http://localhost:3000/logins')
+  console.log(222222, req.body)
+  for(let i = 0; i < users.data.length; i++){
+    console.log('iiii', users.data[i])
+    if(req.body.username === JSON.stringify(users.data[i].username) && req.body.password === JSON.stringify(users.data[i].password)){
+      console.log('is authenticated', true)
+      res.send({authenticated: true})
+    }else{
+      console.log('is authenticated', false )
+      res.send({authenticated: false})
+    }
+  }
+})
 // Submit Form!
 app.post('/api/members/new', async (req, res) => {
   body = {
